@@ -4,6 +4,7 @@ import { startOptions } from "./client.js";
 import { getStats } from "./get_stats.js";
 import { setAutoStopInterval } from "./stop_server.js";
 import { log } from "../util.js";
+import { ActivityType } from "discord.js";
 
 export async function serverStart() {
     log(`Attempting to start server.`);

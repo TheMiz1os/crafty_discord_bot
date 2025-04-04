@@ -1,6 +1,7 @@
 import { ActivityType, Events } from "discord.js";
 
 import { checkConfigFile, config } from "./config.js";
+import { type } from "os";
 await checkConfigFile();
 // Import and run checkConfigFile() before all other imports to set config variable.
 // If this isn't done, it will crash.
@@ -23,10 +24,76 @@ if (stats.running && !isIntervalRunning("autoStopInterval")) {
     console.debug("Restored existing or missing interval.");
 }
 
+async function isServerOnline() {
+    try {
+        let stats = await getStats();
+        return stats.running === true; // Checks if server is online
+    } catch (error) {
+        console.error("Error when checking server status :", error.message);
+        return false; // If fails, the server is considered offline
+    }
+}
+
+let lastStatus = {
+    name: null,
+    type: null
+}
+
+async function updateStatus() {
+    let serverOnline = await isServerOnline(); // Check if server is online
+    let newStatus;
+
+    if (!serverOnline) {
+        newStatus = {
+            name: "Server offline",
+            type: ActivityType.Custom
+        }
+    } else {
+        // Get players number
+        let stats = await getStats();
+        let playerCount = stats.playersOnline || 0;
+        
+        if (playerCount == 0 ) { 
+            // No Players Online
+            newStatus = {
+                name: "No players online", 
+                type: ActivityType.Custom,
+            }; 
+
+        } else if ( playerCount == 1 ) { 
+            // 1 Player Online
+            newStatus = {
+                name: "1 player online", 
+                type: ActivityType.Watching,
+            };
+
+        } else { 
+            // Multiple players online  
+            newStatus = {
+                name: `${playerCount} players`, 
+                type: ActivityType.Watching,
+            };
+            
+        };
+    }
+   
+    //Set activity
+    if (newStatus.name !== lastStatus.name || newStatus.type !== lastStatus.type) {
+        await discordClient.user.setActivity(newStatus.name, { type: newStatus.type });
+        log(`Status Update: ${newStatus.name}`);
+        lastStatus = newStatus;
+        return;
+    } else {
+       // log('No status change'); 
+    }
+}
+
 
 discordClient.on("ready", async (c) => {
-    c.user.setActivity("servers", { type: ActivityType.Watching });
     log(`${c.user.tag} is online!`);
+
+    await updateStatus();
+    setInterval(updateStatus, 30000);
 });
 
 discordClient.on("messageCreate", async (message) => {

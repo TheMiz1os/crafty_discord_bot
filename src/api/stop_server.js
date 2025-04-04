@@ -7,7 +7,6 @@ import { dateTimeToMilliseconds, minutesToMilliseconds, startInterval, stopInter
 
 const waitTime = minutesToMilliseconds(config.auto_stop.empty_wait_time);
 const checkInterval = config.auto_stop.check_interval;
-const stats = await getStats();
 
 let checkedLastLogout = false;
 let timeSinceLastLogout = null;
@@ -31,13 +30,22 @@ export async function serverStop() {
 }
 
 export async function autoStop() {
+    const stats = await getStats(); // Moved here to make sure stats are correctly read
+    let playerCount = stats.playersOnline || 0;
+    //log("Player Count at Start " + playerCount); // DEBUG
     try {
 
         if (!stats.running) {
             return; // Exit early if the server is not running.
         }
-
+        
+        //log(stats.playersOnline + " From stats"); // DEBUG
+        //log(playerCount + " Player Count"); // DEBUG
+        //log("Server is online"); // DEBUG
+        
         if (stats.playersOnline > 0) {
+            //log(stats.playersOnline + " A"); // DEBUG
+            //log(playerCount + " Player Count A"); // DEBUG
             checkedLastLogout = false;
             timeSinceLastLogout = null;
             return; // Reset last logout tracking and exit early if players are online.
@@ -45,7 +53,9 @@ export async function autoStop() {
 
         // The following only runs if the server is online, and there are no players online.
         const currentTime = Date.now();
-
+        //log(stats.playersOnline + " B"); //DEBUG
+        //log(playerCount + " Player Count B"); // DEBUG
+        //log("No player detected"); // DEBUG
         if (!checkedLastLogout) {
             timeSinceLastLogout = currentTime;
             checkedLastLogout = true;
