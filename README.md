@@ -2,7 +2,7 @@
 
 > A Discord Bot to interact with and control [Crafty Controller](https://craftycontrol.com/) through commands in chat.
 
-> Original Project from Coosanta17 at [here](https://github.com/Coosanta17/crafty_discord_bot) (I'm just using it to learn and improve it for personal use)
+> Original Project from Coosanta17 [here](https://github.com/Coosanta17/crafty_discord_bot) (I'm just using it to learn and improve it for personal use).
 
 So far all it does is start *one* server.
 
